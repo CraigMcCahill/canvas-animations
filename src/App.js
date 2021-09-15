@@ -7,9 +7,8 @@ import Kaleidoscope from './Kaleidoscope';
 function App() {
   return (
     <div className="App">
-      <Kaleidoscope/>
+      <Kaleidoscope totalQuads={4} />
     </div>
-        
   );
 }
 

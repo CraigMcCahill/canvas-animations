@@ -32,6 +32,7 @@ const drawQuad = (rotate, context, xPoints, yPoints, totalQuads) => {
 };
 
 const Kaleidoscope = (props) => {
+  const { totalQuads } = props;
   let ref = useRef();
 
   useEffect(() => {
@@ -57,8 +58,6 @@ const Kaleidoscope = (props) => {
     backContext.translate(canvas.width / 2, canvas.height / 2);
 
     let requestId;
-
-    const totalQuads = 16;
     let rotation = 0;
     const quads = [];
 
