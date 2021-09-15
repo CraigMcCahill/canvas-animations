@@ -1,13 +1,11 @@
 import './App.css';
 
-// import Counter from './Counter';
-// import Circle  from './Circle';
-import Kaleidoscope from './Kaleidoscope';
+import AnimationManager from './containers/AnimationManager';
 
 function App() {
   return (
     <div className="App">
-      <Kaleidoscope totalQuads={4} />
+      <AnimationManager />
     </div>
   );
 }

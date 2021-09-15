@@ -109,7 +109,7 @@ const Kaleidoscope = (props) => {
     return () => {
       cancelAnimationFrame(requestId);
     };
-  }, []);
+  }, [totalQuads]);
 
   return <canvas ref={ref} style={{ width: "100vw", height: "100vh" }} />;
 };
