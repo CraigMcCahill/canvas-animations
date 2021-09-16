@@ -5,23 +5,25 @@ import Slider from "@material-ui/core/Slider";
 import Kaleidoscope from "../Kaleidoscope";
 
 const AnimationManager = () => {
-  const [value, setValue] = React.useState(4);
+  const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   return (
-    <div>
-      <Kaleidoscope totalQuads={value} />
-      <Slider
-        value={value}
-        onChange={handleChange}
-        aria-labelledby="discrete-slider"
-        valueLabelDisplay="auto"
-        min={2}
-        max={32}
-      />
+    <div className="animation">
+      <Kaleidoscope totalQuads={24} hue={value} />
+      <div className="controls">
+        <Slider
+          value={value}
+          onChange={handleChange}
+          aria-labelledby="discrete-slider"
+          valueLabelDisplay="auto"
+          min={0}
+          max={360}
+          />
+      </div>
     </div>
   );
 };

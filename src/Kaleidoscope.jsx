@@ -32,11 +32,18 @@ const drawQuad = (rotate, context, xPoints, yPoints, totalQuads) => {
 };
 
 const Kaleidoscope = (props) => {
-  const { totalQuads } = props;
+  const { totalQuads, hue } = props;
   let ref = useRef();
+  const sy = new Array(4);
+  const sx = new Array(4);
+  for (let i = 0; i < 4; i++) {
+    sx[i] = Math.random() * 2 + 1;
+    sy[i] = Math.random() * 2 + 1;
+  }
 
   useEffect(() => {
     let canvas = ref.current;
+
     let context = canvas.getContext("2d");
 
     let ratio = getPixelRatio(context);
@@ -49,17 +56,6 @@ const Kaleidoscope = (props) => {
     canvas.height = height * ratio;
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
-
-    let backCanvas = document.createElement("canvas");
-    backCanvas.height = canvas.height;
-    backCanvas.width = canvas.width;
-    let backContext = backCanvas.getContext("2d");
-    backContext.fillStyle = "rgba(217, 13, 145, .3)";
-    backContext.translate(canvas.width / 2, canvas.height / 2);
-
-    let requestId;
-    let rotation = 0;
-    const quads = [];
 
     //the four corners of the quad
     //TODO: move to init function
@@ -74,13 +70,16 @@ const Kaleidoscope = (props) => {
     cornersY[2] = -height;
     cornersY[3] = 0;
 
-    const sy = new Array(4);
-    const sx = new Array(4);
+    let backCanvas = document.createElement("canvas");
+    backCanvas.height = canvas.height;
+    backCanvas.width = canvas.width;
+    let backContext = backCanvas.getContext("2d");
+    backContext.fillStyle = `hsla(${hue},100%,50%,0.4)`;
+    backContext.translate(canvas.width / 2, canvas.height / 2);
 
-    for (let i = 0; i < 4; i++) {
-      sx[i] = Math.random() * 2 + 1;
-      sy[i] = Math.random() * 2 + 1;
-    }
+    let requestId;
+    let rotation = 0;
+    const quads = [];
 
     const render = () => {
       backContext.save();
@@ -104,12 +103,12 @@ const Kaleidoscope = (props) => {
     };
 
     render();
-    rotation++;
+    // rotation++;
 
     return () => {
       cancelAnimationFrame(requestId);
     };
-  }, [totalQuads]);
+  }, [totalQuads, hue]);
 
   return <canvas ref={ref} style={{ width: "100vw", height: "100vh" }} />;
 };
