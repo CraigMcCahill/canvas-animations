@@ -79,7 +79,6 @@ const Kaleidoscope = (props) => {
 
     let requestId;
     let rotation = 0;
-    const quads = [];
 
     const render = () => {
       backContext.save();
@@ -110,7 +109,17 @@ const Kaleidoscope = (props) => {
     };
   }, [totalQuads, hue]);
 
-  return <canvas ref={ref} style={{ width: "100vw", height: "100vh" }} />;
+  return (
+    <canvas
+      ref={ref}
+      style={{
+        width: "100vw",
+        height: "100vh",
+        maxWidth: "960px",
+        margin: "0 auto",
+      }}
+    />
+  );
 };
 
 export default Kaleidoscope;

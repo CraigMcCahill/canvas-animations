@@ -22,7 +22,7 @@ const AnimationManager = () => {
           valueLabelDisplay="auto"
           min={0}
           max={360}
-          />
+        />
       </div>
     </div>
   );
