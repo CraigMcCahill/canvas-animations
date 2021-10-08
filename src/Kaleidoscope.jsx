@@ -32,6 +32,7 @@ const drawQuad = (rotate, context, xPoints, yPoints, totalQuads) => {
 
 const Kaleidoscope = (props) => {
   const { totalQuads, hue } = props;
+  const quads = Array(totalQuads).fill(0);
   const ref = useRef();
 
   useEffect(() => {
@@ -64,7 +65,7 @@ const Kaleidoscope = (props) => {
     backContext.translate(canvas.width / 2, canvas.height / 2);
 
     let requestId;
-    const rotation = 0;
+    let rotation = 0;
 
     const render = () => {
       backContext.save();
@@ -85,8 +86,8 @@ const Kaleidoscope = (props) => {
         return newCornerY;
       });
 
-      cornersX.forEach(() => {
-        drawQuad(rotation + 1, backContext, cornersX, cornersY, totalQuads);
+      quads.forEach(() => {
+        drawQuad(rotation + 1, backContext, cornersX, cornersY, quads.length);
       });
 
       context.drawImage(backCanvas, 0, 0);
@@ -94,12 +95,12 @@ const Kaleidoscope = (props) => {
     };
 
     render();
-    // rotation += 1;
+    rotation += 1;
 
     return () => {
       cancelAnimationFrame(requestId);
     };
-  }, [totalQuads, hue]);
+  }, [quads, hue]);
 
   return (
     <canvas ref={ref}

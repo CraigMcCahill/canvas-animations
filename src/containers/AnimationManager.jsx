@@ -13,7 +13,7 @@ const AnimationManager = () => {
 
   return (
     <div className="animation">
-      <Kaleidoscope totalQuads={1} hue={value} />
+      <Kaleidoscope totalQuads={16} hue={value} />
       <div className="controls">
         <Slider
           value={value}
