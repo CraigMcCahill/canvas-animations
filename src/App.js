@@ -1,6 +1,8 @@
+import React from 'react';
+
 import "./App.css";
 
-import AnimationManager from "./containers/AnimationManager";
+import AnimationManager from './containers/AnimationManager';
 
 function App() {
   return (

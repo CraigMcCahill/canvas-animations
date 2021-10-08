@@ -1,6 +1,5 @@
-import React from "react";
-
-import { useRef, useEffect } from "react";
+import { React, useRef, useEffect } from "react";
+import PropTypes from 'prop-types';
 
 const getPixelRatio = (context) => {
   const backingStore =
@@ -18,7 +17,6 @@ const getPixelRatio = (context) => {
 const degreesToRadians = (degrees) => degrees * (Math.PI / 180);
 
 const drawQuad = (rotate, context, xPoints, yPoints, totalQuads) => {
-  //alert("Start Draw quad!");
   context.rotate(degreesToRadians(1 * (360 / totalQuads)));
 
   context.beginPath();
@@ -31,24 +29,22 @@ const drawQuad = (rotate, context, xPoints, yPoints, totalQuads) => {
   context.fill();
 };
 
+
 const Kaleidoscope = (props) => {
   const { totalQuads, hue } = props;
-  let ref = useRef();
-  const sy = new Array(4);
-  const sx = new Array(4);
-  for (let i = 0; i < 4; i++) {
-    sx[i] = Math.random() * 2 + 1;
-    sy[i] = Math.random() * 2 + 1;
-  }
+  const ref = useRef();
 
   useEffect(() => {
-    let canvas = ref.current;
+    // x and y coordinate incrementors to move quad corners randomly
+    const sx = new Array(4).fill().map(() => Math.random() * 2 + 1);
+    const sy = new Array(4).fill().map(() => Math.random() * 2 + 1);
+    const canvas = ref.current;
 
-    let context = canvas.getContext("2d");
+    const context = canvas.getContext("2d");
 
-    let ratio = getPixelRatio(context);
-    let width = getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
-    let height = getComputedStyle(canvas)
+    const ratio = getPixelRatio(context);
+    const width = getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+    const height = getComputedStyle(canvas)
       .getPropertyValue("height")
       .slice(0, -2);
 
@@ -57,28 +53,18 @@ const Kaleidoscope = (props) => {
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
 
-    //the four corners of the quad
-    //TODO: move to init function
-    const cornersX = new Array(4);
-    cornersX[0] = 0;
-    cornersX[1] = 0;
-    cornersX[2] = -width;
-    cornersX[3] = -width;
-    const cornersY = new Array(4);
-    cornersY[0] = 0;
-    cornersY[1] = -height;
-    cornersY[2] = -height;
-    cornersY[3] = 0;
+    let cornersX = [0, 0, -width, -width];
+    let cornersY = [0, -height, -height, 0];
 
-    let backCanvas = document.createElement("canvas");
+    const backCanvas = document.createElement("canvas");
     backCanvas.height = canvas.height;
     backCanvas.width = canvas.width;
-    let backContext = backCanvas.getContext("2d");
+    const backContext = backCanvas.getContext("2d");
     backContext.fillStyle = `hsla(${hue},100%,50%,0.4)`;
     backContext.translate(canvas.width / 2, canvas.height / 2);
 
     let requestId;
-    let rotation = 0;
+    const rotation = 0;
 
     const render = () => {
       backContext.save();
@@ -87,22 +73,28 @@ const Kaleidoscope = (props) => {
       context.clearRect(0, 0, canvas.width, canvas.height);
       backContext.restore();
 
-      for (let i = 0; i < 4; i++) {
-        cornersX[i] += sx[i];
-        cornersY[i] += sy[i];
-        if (Math.abs(cornersX[i]) > width) sx[i] = -sx[i];
-        if (Math.abs(cornersY[i]) > height) sy[i] = -sy[i];
-      }
-      for (let i = 0; i < totalQuads; i++) {
+      cornersX = cornersX.map((cornerX, i) => {
+        const newCornerX = cornerX + sx[i];
+        if (Math.abs(newCornerX) > width) sx[i] = -sx[i];
+        return newCornerX;
+      });
+
+      cornersY = cornersY.map((cornerY, i) => {
+        const newCornerY = cornerY + sy[i];
+        if (Math.abs(newCornerY) > height) sy[i] = -sy[i];
+        return newCornerY;
+      });
+
+      cornersX.forEach(() => {
         drawQuad(rotation + 1, backContext, cornersX, cornersY, totalQuads);
-      }
+      });
 
       context.drawImage(backCanvas, 0, 0);
       requestId = requestAnimationFrame(render);
     };
 
     render();
-    // rotation++;
+    // rotation += 1;
 
     return () => {
       cancelAnimationFrame(requestId);
@@ -110,8 +102,7 @@ const Kaleidoscope = (props) => {
   }, [totalQuads, hue]);
 
   return (
-    <canvas
-      ref={ref}
+    <canvas ref={ref}
       style={{
         width: "100vw",
         height: "100vh",
@@ -121,5 +112,11 @@ const Kaleidoscope = (props) => {
     />
   );
 };
+
+Kaleidoscope.propTypes = {
+  totalQuads: PropTypes.number.isRequired,
+  hue: PropTypes.number.isRequired
+};
+
 
 export default Kaleidoscope;
