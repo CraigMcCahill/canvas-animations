@@ -95,7 +95,7 @@ const useKaleidoscope = (canvasRef, totalQuads, hue) => {
     render();
     rotation += 1;
 
-    // Cleanup function to stop the animation when the component unmounts
+    // Cleanup function to stop the animation when the component unmounts 
     return () => {
       cancelAnimationFrame(requestId);
     };
