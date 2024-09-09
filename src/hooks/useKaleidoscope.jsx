@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 const getPixelRatio = (context) => {
   const backingStore =
@@ -27,6 +27,26 @@ const drawQuad = (rotate, context, xPoints, yPoints, totalQuads) => {
 };
 
 const useKaleidoscope = (canvasRef, totalQuads, hue) => {
+  // Memoize random movement speeds for efficiency (these don't change)
+  const sx = useMemo(
+    () =>
+      Array(4)
+        .fill()
+        .map(() => Math.random() * 2 + 1),
+    [],
+  );
+  const sy = useMemo(
+    () =>
+      Array(4)
+        .fill()
+        .map(() => Math.random() * 2 + 1),
+    [],
+  );
+
+  // Memoize the initial corner points for efficiency
+  const initialCornersX = useMemo(() => [0, 0, -1, -1], []);
+  const initialCornersY = useMemo(() => [0, -1, -1, 0], []);
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -39,27 +59,22 @@ const useKaleidoscope = (canvasRef, totalQuads, hue) => {
     const width = parseFloat(computedStyle.getPropertyValue("width"));
     const height = parseFloat(computedStyle.getPropertyValue("height"));
 
+    // Set canvas dimensions considering pixel ratio
     canvas.width = width * ratio;
     canvas.height = height * ratio;
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
 
-    const sx = Array(4)
-      .fill()
-      .map(() => Math.random() * 2 + 1);
-    const sy = Array(4)
-      .fill()
-      .map(() => Math.random() * 2 + 1);
-
-    let cornersX = [0, 0, -width, -width];
-    let cornersY = [0, -height, -height, 0];
-
+    // Create the backCanvas once
     const backCanvas = document.createElement("canvas");
     backCanvas.width = canvas.width;
     backCanvas.height = canvas.height;
     const backContext = backCanvas.getContext("2d");
     backContext.fillStyle = `hsla(${hue},100%,50%,0.4)`;
     backContext.translate(canvas.width / 2, canvas.height / 2);
+
+    let cornersX = initialCornersX.map((corner) => corner * width);
+    let cornersY = initialCornersY.map((corner) => corner * height);
 
     let requestId;
     let rotation = 0;
@@ -103,7 +118,7 @@ const useKaleidoscope = (canvasRef, totalQuads, hue) => {
     return () => {
       if (requestId) cancelAnimationFrame(requestId);
     };
-  }, [canvasRef, totalQuads, hue]); // Dependencies: ref, totalQuads, hue
+  }, [canvasRef, totalQuads, hue, initialCornersX, initialCornersY, sx, sy]); // Dependencies: ref, totalQuads, hue
 };
 
 export default useKaleidoscope;
