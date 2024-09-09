@@ -42,7 +42,10 @@ const useKaleidoscope = (canvasRef, totalQuads, hue) => {
     const context = canvas.getContext("2d");
 
     const ratio = getPixelRatio(context);
-    const width = getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+    // error here
+    const width = getComputedStyle(canvas)
+      .getPropertyValue("width")
+      .slice(0, -2);
     const height = getComputedStyle(canvas)
       .getPropertyValue("height")
       .slice(0, -2);
@@ -84,9 +87,11 @@ const useKaleidoscope = (canvasRef, totalQuads, hue) => {
         return newCornerY;
       });
 
-      Array(totalQuads).fill(0).forEach(() => {
-        drawQuad(rotation + 1, backContext, cornersX, cornersY, totalQuads);
-      });
+      Array(totalQuads)
+        .fill(0)
+        .forEach(() => {
+          drawQuad(rotation + 1, backContext, cornersX, cornersY, totalQuads);
+        });
 
       context.drawImage(backCanvas, 0, 0);
       requestId = requestAnimationFrame(render);
@@ -95,7 +100,7 @@ const useKaleidoscope = (canvasRef, totalQuads, hue) => {
     render();
     rotation += 1;
 
-    // Cleanup function to stop the animation when the component unmounts 
+    // Cleanup function to stop the animation when the component unmounts
     return () => {
       cancelAnimationFrame(requestId);
     };
