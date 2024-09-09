@@ -2,7 +2,7 @@ import React from "react";
 
 import Slider from "@material-ui/core/Slider";
 
-import Kaleidoscope from "../Kaleidoscope";
+import Kaleidoscope from "./Kaleidoscope";
 
 const AnimationManager = () => {
   const [value, setValue] = React.useState(0);
