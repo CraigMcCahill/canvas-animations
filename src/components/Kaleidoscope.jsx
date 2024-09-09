@@ -13,8 +13,7 @@ const Kaleidoscope = ({ totalQuads, hue }) => {
       style={{
         width: "100vw",
         height: "100vh",
-        maxWidth: "960px",
-        margin: "0 auto",
+        // maxWidth: "960px",
       }}
     />
   );
