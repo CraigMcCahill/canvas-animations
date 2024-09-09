@@ -1,5 +1,4 @@
-import { React, useRef, useEffect } from "react";
-import PropTypes from 'prop-types';
+import { useEffect } from "react";
 
 const getPixelRatio = (context) => {
   const backingStore =
@@ -29,17 +28,16 @@ const drawQuad = (rotate, context, xPoints, yPoints, totalQuads) => {
   context.fill();
 };
 
-
-const Kaleidoscope = (props) => {
-  const { totalQuads, hue } = props;
-  const quads = Array(totalQuads).fill(0);
-  const ref = useRef();
-
+const useKaleidoscope = (canvasRef, totalQuads, hue) => {
   useEffect(() => {
-    // x and y coordinate incrementors to move quad corners randomly
+    if (!canvasRef.current) {
+      // Return undefined if canvasRef is not ready, to satisfy consistent-return
+      return undefined;
+    }
+
     const sx = new Array(4).fill().map(() => Math.random() * 2 + 1);
     const sy = new Array(4).fill().map(() => Math.random() * 2 + 1);
-    const canvas = ref.current;
+    const canvas = canvasRef.current;
 
     const context = canvas.getContext("2d");
 
@@ -86,8 +84,8 @@ const Kaleidoscope = (props) => {
         return newCornerY;
       });
 
-      quads.forEach(() => {
-        drawQuad(rotation + 1, backContext, cornersX, cornersY, quads.length);
+      Array(totalQuads).fill(0).forEach(() => {
+        drawQuad(rotation + 1, backContext, cornersX, cornersY, totalQuads);
       });
 
       context.drawImage(backCanvas, 0, 0);
@@ -97,27 +95,11 @@ const Kaleidoscope = (props) => {
     render();
     rotation += 1;
 
+    // Cleanup function to stop the animation when the component unmounts
     return () => {
       cancelAnimationFrame(requestId);
     };
-  }, [quads, hue]);
-
-  return (
-    <canvas ref={ref}
-      style={{
-        width: "100vw",
-        height: "100vh",
-        maxWidth: "960px",
-        margin: "0 auto",
-      }}
-    />
-  );
+  }, [canvasRef, totalQuads, hue]); // Dependencies: ref, totalQuads, and hue
 };
 
-Kaleidoscope.propTypes = {
-  totalQuads: PropTypes.number.isRequired,
-  hue: PropTypes.number.isRequired
-};
-
-
-export default Kaleidoscope;
+export default useKaleidoscope;
