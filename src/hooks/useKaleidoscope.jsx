@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 const getPixelRatio = (context) => {
   const backingStore =
@@ -15,96 +15,131 @@ const getPixelRatio = (context) => {
 
 const degreesToRadians = (degrees) => degrees * (Math.PI / 180);
 
-const drawQuad = (rotate, context, xPoints, yPoints, totalQuads) => {
-  context.rotate(degreesToRadians(1 * (360 / totalQuads)));
-
+const drawQuad = (context, xPoints, yPoints) => {
   context.beginPath();
   context.moveTo(xPoints[0], yPoints[0]);
   context.lineTo(xPoints[1], yPoints[1]);
   context.lineTo(xPoints[2], yPoints[2]);
   context.lineTo(xPoints[3], yPoints[3]);
-
   context.closePath();
   context.fill();
 };
 
 const useKaleidoscope = (canvasRef, totalQuads, hue) => {
-  useEffect(() => {
-    if (!canvasRef.current) {
-      // Return undefined if canvasRef is not ready, to satisfy consistent-return
-      return undefined;
-    }
+  const sx = useMemo(
+    () =>
+      Array(4)
+        .fill()
+        .map(() => Math.random() * 2 + 1),
+    [],
+  );
+  const sy = useMemo(
+    () =>
+      Array(4)
+        .fill()
+        .map(() => Math.random() * 2 + 1),
+    [],
+  );
+  const initialCornersX = useMemo(() => [0, 0, -1, -1], []);
+  const initialCornersY = useMemo(() => [0, -1, -1, 0], []);
 
-    const sx = new Array(4).fill().map(() => Math.random() * 2 + 1);
-    const sy = new Array(4).fill().map(() => Math.random() * 2 + 1);
+  const resizeCanvas = useCallback(() => {
+    if (!canvasRef.current) return;
+
     const canvas = canvasRef.current;
-
     const context = canvas.getContext("2d");
-
     const ratio = getPixelRatio(context);
-    // error here
-    const width = getComputedStyle(canvas)
-      .getPropertyValue("width")
-      .slice(0, -2);
-    const height = getComputedStyle(canvas)
-      .getPropertyValue("height")
-      .slice(0, -2);
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
     canvas.width = width * ratio;
     canvas.height = height * ratio;
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
 
-    let cornersX = [0, 0, -width, -width];
-    let cornersY = [0, -height, -height, 0];
+    return { width, height, ratio };
+  }, [canvasRef]);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    let cornersX, cornersY, requestId;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
 
     const backCanvas = document.createElement("canvas");
-    backCanvas.height = canvas.height;
-    backCanvas.width = canvas.width;
     const backContext = backCanvas.getContext("2d");
-    backContext.fillStyle = `hsla(${hue},100%,50%,0.4)`;
-    backContext.translate(canvas.width / 2, canvas.height / 2);
 
-    let requestId;
-    let rotation = 0;
+    const initializeAnimation = () => {
+      const { width, height, ratio } = resizeCanvas();
 
-    const render = () => {
-      backContext.save();
-      backContext.setTransform(1, 0, 0, 1, 0, 0);
-      backContext.clearRect(0, 0, canvas.width, canvas.height);
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      backContext.restore();
+      // Resize the back canvas
+      backCanvas.width = width * ratio;
+      backCanvas.height = height * ratio;
+      backContext.fillStyle = `hsla(${hue},100%,50%,0.4)`;
+      backContext.translate(backCanvas.width / 2, backCanvas.height / 2);
 
-      cornersX = cornersX.map((cornerX, i) => {
-        const newCornerX = cornerX + sx[i];
-        if (Math.abs(newCornerX) > width) sx[i] = -sx[i];
-        return newCornerX;
-      });
+      cornersX = initialCornersX.map((corner) => corner * width);
+      cornersY = initialCornersY.map((corner) => corner * height);
 
-      cornersY = cornersY.map((cornerY, i) => {
-        const newCornerY = cornerY + sy[i];
-        if (Math.abs(newCornerY) > height) sy[i] = -sy[i];
-        return newCornerY;
-      });
+      if (requestId) cancelAnimationFrame(requestId);
 
-      Array(totalQuads)
-        .fill(0)
-        .forEach(() => {
-          drawQuad(rotation + 1, backContext, cornersX, cornersY, totalQuads);
+      const render = () => {
+        backContext.save();
+        backContext.setTransform(1, 0, 0, 1, 0, 0); // Reset transformation
+        backContext.clearRect(0, 0, backCanvas.width, backCanvas.height);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        backContext.restore();
+
+        cornersX = cornersX.map((cornerX, i) => {
+          const newCornerX = cornerX + sx[i];
+          if (Math.abs(newCornerX) > width) sx[i] = -sx[i];
+          return newCornerX;
         });
 
-      context.drawImage(backCanvas, 0, 0);
-      requestId = requestAnimationFrame(render);
+        cornersY = cornersY.map((cornerY, i) => {
+          const newCornerY = cornerY + sy[i];
+          if (Math.abs(newCornerY) > height) sy[i] = -sy[i];
+          return newCornerY;
+        });
+
+        for (let i = 0; i < totalQuads; i++) {
+          drawQuad(backContext, cornersX, cornersY, totalQuads);
+          backContext.rotate(degreesToRadians(360 / totalQuads));
+        }
+
+        context.drawImage(backCanvas, 0, 0);
+        requestId = requestAnimationFrame(render);
+      };
+
+      render();
     };
 
-    render();
-    rotation += 1;
+    initializeAnimation();
 
-    // Cleanup function to stop the animation when the component unmounts
+    const handleResize = () => {
+      initializeAnimation(); // Reinitialize animation when resized
+    };
+
+    window.addEventListener("resize", handleResize);
+
     return () => {
       cancelAnimationFrame(requestId);
+      window.removeEventListener("resize", handleResize);
     };
-  }, [canvasRef, totalQuads, hue]); // Dependencies: ref, totalQuads, and hue
+  }, [
+    canvasRef,
+    totalQuads,
+    hue,
+    resizeCanvas,
+    initialCornersX,
+    initialCornersY,
+    sx,
+    sy,
+  ]);
+
+  return null;
 };
 
 export default useKaleidoscope;

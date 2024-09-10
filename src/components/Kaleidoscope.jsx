@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
 import PropTypes from "prop-types";
+import React, { useRef } from "react";
 import useKaleidoscope from "../hooks/useKaleidoscope";
 
 const Kaleidoscope = ({ totalQuads, hue }) => {
@@ -13,8 +13,6 @@ const Kaleidoscope = ({ totalQuads, hue }) => {
       style={{
         width: "100vw",
         height: "100vh",
-        maxWidth: "960px",
-        margin: "0 auto",
       }}
     />
   );
