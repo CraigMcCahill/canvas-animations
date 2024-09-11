@@ -77,7 +77,7 @@ const useKaleidoscope = (canvasRef, totalQuads, hue) => {
       // Resize the back canvas
       backCanvas.width = width * ratio;
       backCanvas.height = height * ratio;
-      backContext.fillStyle = `hsla(${hue},100%,50%,0.4)`;
+      backContext.fillStyle = `hsla(${hue},100%,80%,0.4)`;
       backContext.translate(backCanvas.width / 2, backCanvas.height / 2);
 
       cornersX = initialCornersX.map((corner) => corner * width);
