@@ -1,9 +1,15 @@
+import React from "react";
 import PropTypes from "prop-types";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import useKaleidoscope from "../hooks/useKaleidoscope";
 
-const Kaleidoscope = ({ totalQuads, hue }) => {
-  const canvasRef = useRef(null);
+interface KaleidoscopeProps {
+  totalQuads: number;
+  hue: number;
+}
+
+const Kaleidoscope = ({ totalQuads, hue }: KaleidoscopeProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useKaleidoscope(canvasRef, totalQuads, hue);
 

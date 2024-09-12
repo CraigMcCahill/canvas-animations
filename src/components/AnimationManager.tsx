@@ -7,7 +7,11 @@ import Kaleidoscope from "./Kaleidoscope";
 const AnimationManager = () => {
   const [value, setValue] = React.useState(0);
 
-  const handleChange = (event, newValue) => {
+  const handleChange = (
+    event: React.ChangeEvent<object>,
+    newValue: number | number[],
+  ) => {
+    if (Array.isArray(newValue)) return;
     setValue(newValue);
   };
 
